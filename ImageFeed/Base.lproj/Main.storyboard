@@ -98,7 +98,7 @@
             <objects>
                 <viewController id="akV-Cu-FC3" customClass="ProfileViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="X3I-Mk-LQs">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="769"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="735"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="profileDefaultImage" translatesAutoresizingMaskIntoConstraints="NO" id="Z0o-sW-anT">
@@ -225,10 +225,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ngu-9l-Yb9">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="0" translatesAutoresizingMaskIntoConstraints="NO" id="KpR-bl-r4O">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1059"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     </imageView>
                                 </subviews>
@@ -252,12 +252,27 @@
                                     <action selector="tapOnBackButton:" destination="qpC-mE-021" eventType="touchUpInside" id="s6E-rL-rgJ"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="di9-5A-XfI">
+                                <rect key="frame" x="171.66666666666666" y="772" width="50" height="50"/>
+                                <color key="backgroundColor" red="0.1019607843" green="0.1058823529" blue="0.1333333333" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="3fd-6z-XDR"/>
+                                    <constraint firstAttribute="width" constant="50" id="Dru-SU-Tfu"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="share"/>
+                                <connections>
+                                    <action selector="tapOnShareButton:" destination="qpC-mE-021" eventType="touchUpInside" id="HRA-4d-Kaq"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="mnN-Mh-4LC"/>
-                        <color key="backgroundColor" red="0.1019607843" green="0.1058823529" blue="0.1333333333" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" name="BackgroundColor"/>
                         <constraints>
                             <constraint firstItem="mnN-Mh-4LC" firstAttribute="trailing" secondItem="Ngu-9l-Yb9" secondAttribute="trailing" id="81A-DL-JRU"/>
                             <constraint firstItem="dKC-vO-Skn" firstAttribute="top" secondItem="mnN-Mh-4LC" secondAttribute="top" constant="8" id="HJk-Lj-1Gh"/>
+                            <constraint firstAttribute="bottom" secondItem="di9-5A-XfI" secondAttribute="bottom" constant="30" id="TuI-Pt-z3f"/>
+                            <constraint firstItem="di9-5A-XfI" firstAttribute="centerX" secondItem="zpS-Ml-aoB" secondAttribute="centerX" id="Ucm-tB-6vw"/>
                             <constraint firstItem="Ngu-9l-Yb9" firstAttribute="top" secondItem="zpS-Ml-aoB" secondAttribute="top" id="Zw0-Qp-ms3"/>
                             <constraint firstItem="Ngu-9l-Yb9" firstAttribute="bottom" secondItem="zpS-Ml-aoB" secondAttribute="bottom" id="eAI-aY-qM2"/>
                             <constraint firstItem="dKC-vO-Skn" firstAttribute="leading" secondItem="mnN-Mh-4LC" secondAttribute="leading" constant="8" id="nDP-fT-xeY"/>
@@ -269,6 +284,7 @@
                         <outlet property="backButton" destination="dKC-vO-Skn" id="YWc-ia-kjV"/>
                         <outlet property="imageView" destination="KpR-bl-r4O" id="N02-RC-Zhd"/>
                         <outlet property="scrollView" destination="Ngu-9l-Yb9" id="YNK-jF-mo2"/>
+                        <outlet property="shareButton" destination="di9-5A-XfI" id="ow6-Er-sAW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4up-el-c8Y" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -282,6 +298,7 @@
         <image name="back" width="24" height="24"/>
         <image name="logoutButton" width="24" height="24"/>
         <image name="profileDefaultImage" width="46.666667938232422" height="46.666667938232422"/>
+        <image name="share" width="30" height="30"/>
         <image name="tab_editorial_active" width="30" height="30"/>
         <image name="tab_profile_active" width="30" height="30"/>
         <namedColor name="BackgroundColor">
