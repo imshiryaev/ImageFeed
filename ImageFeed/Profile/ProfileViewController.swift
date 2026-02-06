@@ -1,15 +1,102 @@
 import UIKit
 
 class ProfileViewController: UIViewController {
+    
+    var profileImageView = UIImageView()
+    let profileName = UILabel()
+    let profileUsername = UILabel()
+    let profileDescription = UILabel()
+    let profileExitButton = UIButton()
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
+    }
+    
+    private func setupUI() {
+        setupProfileImage()
+        setupProfileName()
+        setupProfileUsername()
+        setupProfileDescription()
+        setupExitProfileButton()
+    }
+    
+    private func setupProfileImage() {
+        let image = UIImage(resource: .profileDefault)
+        
+        profileImageView = UIImageView(image: image)
+        
+        view.addSubview(profileImageView)
+        
+        profileImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate(
+            [
+                profileImageView.widthAnchor.constraint(equalToConstant: 70),
+                profileImageView.heightAnchor.constraint(equalToConstant: 70),
+                profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
+                profileImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16)
+            ]
+        )
+        
+    }
+    
+    private func setupProfileName() {
+        view.addSubview(profileName)
+        profileName.text = "Имя Фамилия"
+        profileName.font = UIFont(name: "SFProDisplay-Bold", size: 23)
+        profileName.textColor = .white
+        profileName.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(
+            [
+                profileName.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8),
+                profileName.leadingAnchor.constraint(equalTo: profileImageView.leadingAnchor)
+            ]
+        )
+    }
+    
+    private func setupProfileUsername() {
+        view.addSubview(profileUsername)
+        profileUsername.text = "@username"
+        profileUsername.textColor = UIColor(resource: .gray)
+        profileUsername.font = UIFont(name: "SFProDisplay-Regular", size: 13)
+        
+        profileUsername.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(
+            [
+                profileUsername.topAnchor.constraint(equalTo: profileName.bottomAnchor, constant: 8),
+                profileUsername.leadingAnchor.constraint(equalTo: profileImageView.leadingAnchor)
+            ]
+        )
     }
 
-    @IBOutlet weak var profileImage: UIImageView!
-    @IBOutlet weak var profileFullName: UILabel!
-    @IBOutlet weak var profileUsername: UILabel!
-    @IBOutlet weak var profileDescription: UILabel!
-    @IBOutlet weak var profileLogoutButton: UIButton!
-    @IBAction func tapOnLogoutButton(_ sender: Any) {
+    private func setupProfileDescription() {
+        view.addSubview(profileDescription)
+        profileDescription.text = "Hello World!"
+        profileDescription.textColor = .white
+        profileDescription.font = UIFont(name: "SFProDisplay-Regular", size: 13)
+        
+        profileDescription.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(
+            [
+                profileDescription.topAnchor.constraint(equalTo: profileUsername.bottomAnchor, constant: 8),
+                profileDescription.leadingAnchor.constraint(equalTo: profileImageView.leadingAnchor)
+            ]
+        )
     }
+    
+    private func setupExitProfileButton() {
+        view.addSubview(profileExitButton)
+        profileExitButton.setImage(.logoutButton, for: .normal)
+        profileExitButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(
+            [
+                profileExitButton.widthAnchor.constraint(equalToConstant: 24), profileExitButton.heightAnchor.constraint(equalToConstant: 24),
+                profileExitButton.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor),
+                profileExitButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
+            ]
+        )
+    }
+
 }
