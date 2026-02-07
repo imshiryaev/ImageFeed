@@ -1,12 +1,12 @@
 import UIKit
 
-class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController {
     
-    var profileImageView = UIImageView()
-    let profileName = UILabel()
-    let profileUsername = UILabel()
-    let profileDescription = UILabel()
-    let profileExitButton = UIButton()
+    private var profileImageView = UIImageView()
+    private let profileName = UILabel()
+    private let profileUsername = UILabel()
+    private let profileDescription = UILabel()
+    private let profileExitButton = UIButton()
 
     
     override func viewDidLoad() {
@@ -45,7 +45,7 @@ class ProfileViewController: UIViewController {
     private func setupProfileName() {
         view.addSubview(profileName)
         profileName.text = "Имя Фамилия"
-        profileName.font = UIFont(name: "SFProDisplay-Bold", size: 23)
+        profileName.font = Fonts.sfProDisplaytBold23
         profileName.textColor = .white
         profileName.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
@@ -60,7 +60,7 @@ class ProfileViewController: UIViewController {
         view.addSubview(profileUsername)
         profileUsername.text = "@username"
         profileUsername.textColor = UIColor(resource: .gray)
-        profileUsername.font = UIFont(name: "SFProDisplay-Regular", size: 13)
+        profileUsername.font = Fonts.sfProDisplaytRegular13
         
         profileUsername.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
@@ -75,7 +75,7 @@ class ProfileViewController: UIViewController {
         view.addSubview(profileDescription)
         profileDescription.text = "Hello World!"
         profileDescription.textColor = .white
-        profileDescription.font = UIFont(name: "SFProDisplay-Regular", size: 13)
+        profileDescription.font = Fonts.sfProDisplaytRegular13
         
         profileDescription.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
