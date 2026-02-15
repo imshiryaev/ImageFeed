@@ -1,16 +1,21 @@
 import UIKit
 
+protocol AuthViewControllerDelegate: AnyObject {
+    func didAuthenticate(_ vc: AuthViewController)
+}
+
 final class AuthViewController: UIViewController {
+    
+    var delegate: AuthViewControllerDelegate?
         
     private let authButton = UIButton()
     private let authLogo = UIImageView()
-    
+            
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         
-        let webViewViewController = WebViewViewController()
-        webViewViewController.delegate = self
+        navigationItem.hidesBackButton = true
     }
     
     private func setupUI() {
@@ -29,11 +34,13 @@ final class AuthViewController: UIViewController {
         authButton.layer.cornerRadius = 16
         authButton.addAction(
             UIAction { [weak self] _ in
-                print("tap")
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let webViewVC = storyboard.instantiateViewController(withIdentifier: "WebViewViewController")
+                guard let self else { return }
                 
-                self?.navigationController?.pushViewController(webViewVC, animated: true)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let webViewVC = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as! WebViewViewController
+                webViewVC.delegate = self
+                
+                self.navigationController?.pushViewController(webViewVC, animated: true)
             },
             for: .touchUpInside
         )
@@ -71,9 +78,19 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        OAuth2Service.shared.fetchOAuthToken(code: code, completion: { [weak self] result in
+            guard let self else { return }
+            
+            switch result {
+            case .success(let success):
+                self.delegate?.didAuthenticate(self)
+            case .failure(let failure):
+                break
+            }
+        })
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-        vc.dismiss(animated: true)
+//        vc.dismiss(animated: true)
     }
 }
