@@ -7,10 +7,10 @@ protocol AuthViewControllerDelegate: AnyObject {
 final class AuthViewController: UIViewController {
     
     var delegate: AuthViewControllerDelegate?
-        
+    
     private let authButton = UIButton()
     private let authLogo = UIImageView()
-            
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -37,7 +37,9 @@ final class AuthViewController: UIViewController {
                 guard let self else { return }
                 
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let webViewVC = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as! WebViewViewController
+                let webViewVC = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as? WebViewViewController
+                
+                guard let webViewVC else { return }
                 webViewVC.delegate = self
                 
                 self.navigationController?.pushViewController(webViewVC, animated: true)
@@ -54,7 +56,7 @@ final class AuthViewController: UIViewController {
             authButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
     }
-        
+    
     private func setupAuthLogo() {
         view.addSubview(authLogo)
         authLogo.image = UIImage(resource: .authScreenLogo)
@@ -78,19 +80,22 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        vc.navigationController?.popViewController(animated: false)
+        
         OAuth2Service.shared.fetchOAuthToken(code: code, completion: { [weak self] result in
             guard let self else { return }
-            
+
             switch result {
-            case .success(let success):
+            case .success(_):
                 self.delegate?.didAuthenticate(self)
-            case .failure(let failure):
+                break
+            case .failure(_):
                 break
             }
         })
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-//        vc.dismiss(animated: true)
+        vc.navigationController?.popViewController(animated: true)
     }
 }

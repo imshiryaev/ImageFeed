@@ -8,7 +8,7 @@ protocol WebViewViewControllerDelegate: AnyObject {
 
 final class WebViewViewController: UIViewController {
     weak var delegate: WebViewViewControllerDelegate?
-            
+    
     private var webView = WKWebView()
     private lazy var progressView: UIProgressView = {
         let progress = UIProgressView()
@@ -96,6 +96,7 @@ final class WebViewViewController: UIViewController {
 extension WebViewViewController: WKNavigationDelegate {
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: Constants.unsplashAuthorizeURLString) else {
+            Log(.error, "Invalid OAuth token URL string: \(Constants.unsplashAuthorizeURLString)")
             return
         }
         
@@ -107,20 +108,30 @@ extension WebViewViewController: WKNavigationDelegate {
         ]
         
         guard let url = urlComponents.url else {
+            Log(.error, "Invalid URL")
             return
         }
         
         let request = URLRequest(url: url)
         webView.load(request)
     }
-
+    
     private func fetchCode(from navigationAction: WKNavigationAction) -> String? {
         guard
             let url = navigationAction.request.url,
             let urlComponents = URLComponents(string: url.absoluteString),
+            urlComponents.host == "unsplash.com",
             urlComponents.path == "/oauth/authorize/native",
             let item = urlComponents.queryItems?.first(where: { $0.name == "code" })
-        else { return nil }
+        else {
+            #if DEBUG
+            Log(.debug, "No OAuth code found in navigation URL — probably a regular page load \(navigationAction.request.url?.absoluteString ?? "nil")")
+            #endif
+            return nil
+        }
+        #if DEBUG
+        Log(.debug, "Successfully extracted OAuth code")
+        #endif
         
         return item.value
     }
@@ -131,7 +142,6 @@ extension WebViewViewController: WKNavigationDelegate {
         decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void
     ) {
         guard let code = fetchCode(from: navigationAction) else {
-            delegate?.webViewViewControllerDidCancel(self)
             decisionHandler(.allow)
             return
         }
