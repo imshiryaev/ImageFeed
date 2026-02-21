@@ -1,19 +1,18 @@
 import UIKit
 
 final class ProfileViewController: UIViewController {
-    
+
     private var profileImageView = UIImageView()
     private let profileName = UILabel()
     private let profileUsername = UILabel()
     private let profileDescription = UILabel()
     private let profileExitButton = UIButton()
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
     }
-    
+
     private func setupUI() {
         setupProfileImage()
         setupProfileName()
@@ -21,27 +20,33 @@ final class ProfileViewController: UIViewController {
         setupProfileDescription()
         setupExitProfileButton()
     }
-    
+
     private func setupProfileImage() {
         let image = UIImage(resource: .profileDefault)
-        
+
         profileImageView = UIImageView(image: image)
-        
+
         view.addSubview(profileImageView)
-        
+
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         NSLayoutConstraint.activate(
             [
                 profileImageView.widthAnchor.constraint(equalToConstant: 70),
                 profileImageView.heightAnchor.constraint(equalToConstant: 70),
-                profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
-                profileImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16)
+                profileImageView.topAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.topAnchor,
+                    constant: 32
+                ),
+                profileImageView.leadingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                    constant: 16
+                ),
             ]
         )
-        
+
     }
-    
+
     private func setupProfileName() {
         view.addSubview(profileName)
         profileName.text = "Имя Фамилия"
@@ -50,23 +55,33 @@ final class ProfileViewController: UIViewController {
         profileName.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
             [
-                profileName.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8),
-                profileName.leadingAnchor.constraint(equalTo: profileImageView.leadingAnchor)
+                profileName.topAnchor.constraint(
+                    equalTo: profileImageView.bottomAnchor,
+                    constant: 8
+                ),
+                profileName.leadingAnchor.constraint(
+                    equalTo: profileImageView.leadingAnchor
+                ),
             ]
         )
     }
-    
+
     private func setupProfileUsername() {
         view.addSubview(profileUsername)
         profileUsername.text = "@username"
         profileUsername.textColor = UIColor(resource: .gray)
         profileUsername.font = Fonts.sfProDisplaytRegular13
-        
+
         profileUsername.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
             [
-                profileUsername.topAnchor.constraint(equalTo: profileName.bottomAnchor, constant: 8),
-                profileUsername.leadingAnchor.constraint(equalTo: profileImageView.leadingAnchor)
+                profileUsername.topAnchor.constraint(
+                    equalTo: profileName.bottomAnchor,
+                    constant: 8
+                ),
+                profileUsername.leadingAnchor.constraint(
+                    equalTo: profileImageView.leadingAnchor
+                ),
             ]
         )
     }
@@ -76,25 +91,36 @@ final class ProfileViewController: UIViewController {
         profileDescription.text = "Hello World!"
         profileDescription.textColor = .white
         profileDescription.font = Fonts.sfProDisplaytRegular13
-        
+
         profileDescription.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
             [
-                profileDescription.topAnchor.constraint(equalTo: profileUsername.bottomAnchor, constant: 8),
-                profileDescription.leadingAnchor.constraint(equalTo: profileImageView.leadingAnchor)
+                profileDescription.topAnchor.constraint(
+                    equalTo: profileUsername.bottomAnchor,
+                    constant: 8
+                ),
+                profileDescription.leadingAnchor.constraint(
+                    equalTo: profileImageView.leadingAnchor
+                ),
             ]
         )
     }
-    
+
     private func setupExitProfileButton() {
         view.addSubview(profileExitButton)
         profileExitButton.setImage(.logoutButton, for: .normal)
         profileExitButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
             [
-                profileExitButton.widthAnchor.constraint(equalToConstant: 24), profileExitButton.heightAnchor.constraint(equalToConstant: 24),
-                profileExitButton.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor),
-                profileExitButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
+                profileExitButton.widthAnchor.constraint(equalToConstant: 24),
+                profileExitButton.heightAnchor.constraint(equalToConstant: 24),
+                profileExitButton.centerYAnchor.constraint(
+                    equalTo: profileImageView.centerYAnchor
+                ),
+                profileExitButton.trailingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -16
+                ),
             ]
         )
     }
