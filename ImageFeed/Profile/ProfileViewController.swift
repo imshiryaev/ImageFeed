@@ -8,9 +8,15 @@ final class ProfileViewController: UIViewController {
     private let profileDescription = UILabel()
     private let profileExitButton = UIButton()
 
+    private let storage = OAuth2TokenStorage()
+    private let profileService = ProfileService.shared
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        guard let profile = profileService.profile else { return }
+        updateProfileDetails(profile: profile)
     }
 
     private func setupUI() {
@@ -19,6 +25,12 @@ final class ProfileViewController: UIViewController {
         setupProfileUsername()
         setupProfileDescription()
         setupExitProfileButton()
+    }
+
+    private func updateProfileDetails(profile: ProfileViewModel) {
+        profileName.text = profile.name
+        profileUsername.text = profile.username
+        profileDescription.text = profile.bio
     }
 
     private func setupProfileImage() {
@@ -49,7 +61,6 @@ final class ProfileViewController: UIViewController {
 
     private func setupProfileName() {
         view.addSubview(profileName)
-        profileName.text = "Имя Фамилия"
         profileName.font = Fonts.sfProDisplaytBold23
         profileName.textColor = .white
         profileName.translatesAutoresizingMaskIntoConstraints = false
