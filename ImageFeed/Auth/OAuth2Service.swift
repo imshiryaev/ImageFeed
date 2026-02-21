@@ -5,7 +5,7 @@ final class OAuth2Service {
 
     private let tokenStorage = OAuth2TokenStorage()
 
-    private var task: URLSessionTask? = nil
+    private var lastTask: URLSessionTask? = nil
     private var lastCode: String? = nil
 
     private init() {}
@@ -16,12 +16,17 @@ final class OAuth2Service {
     ) {
         assert(Thread.isMainThread)
 
+        guard lastTask == nil else {
+            Log(.error, "Fetch token already in progress")
+            return
+        }
+
         guard lastCode != code else {
             completion(.failure(NetworkError.invalidRequest))
             return
         }
 
-        task?.cancel()
+        lastTask?.cancel()
         lastCode = code
 
         guard let request = makeOAuthTokenRequest(code: code) else {
@@ -35,39 +40,47 @@ final class OAuth2Service {
                 DispatchQueue.main.async {
                     guard let self else { return }
 
-                    switch result {
-                    case .success(let data):
-                        do {
-                            let token = try JSONDecoder.snakeCase.decode(
-                                OAuthTokenResponseBody.self,
-                                from: data
-                            )
-                            self.tokenStorage.setToken(token.accessToken)
-                            completion(.success(token.accessToken))
-
-                            self.task = nil
-                            self.lastCode = nil
-
-                            #if DEBUG
-                                Log(.debug, "Successfully decoded access token")
-                            #endif
-                        } catch {
-                            completion(
-                                .failure(NetworkError.decodingError(error))
-                            )
-                            Log(.error, "Decoding failed: \(error)")
-                        }
-                    case .failure(let error):
-                        completion(.failure(error))
+                    defer {
+                        self.lastTask = nil
+                        self.lastCode = nil
                     }
+                    self.handleOAuthTokenResponse(result, completion: completion)
                 }
+                #if DEBUG
+                    Log(.debug, "Successfully send request")
+                #endif
             }
         )
-        self.task = task
+        self.lastTask = task
         task.resume()
-        #if DEBUG
-            Log(.debug, "Successfully send request")
-        #endif
+    }
+
+    func handleOAuthTokenResponse(
+        _ result: Result<Data, Error>,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        switch result {
+        case .success(let data):
+            do {
+                let token = try JSONDecoder.snakeCase.decode(
+                    OAuthTokenResponseBody.self,
+                    from: data
+                )
+                self.tokenStorage.setToken(token.accessToken)
+                completion(.success(token.accessToken))
+
+                #if DEBUG
+                    Log(.debug, "Successfully decoded access token")
+                #endif
+            } catch {
+                completion(
+                    .failure(NetworkError.decodingError(error))
+                )
+                Log(.error, "Decoding failed: \(error)")
+            }
+        case .failure(let error):
+            completion(.failure(error))
+        }
     }
 
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
