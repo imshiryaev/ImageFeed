@@ -4,14 +4,11 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
 
     private let tokenStorage = OAuth2TokenStorage()
-    private let decoder = JSONDecoder()
 
     private var task: URLSessionTask? = nil
     private var lastCode: String? = nil
 
-    private init() {
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-    }
+    private init() {}
 
     func fetchOAuthToken(
         code: String,
@@ -41,7 +38,7 @@ final class OAuth2Service {
                     switch result {
                     case .success(let data):
                         do {
-                            let token = try self.decoder.decode(
+                            let token = try JSONDecoder.snakeCase.decode(
                                 OAuthTokenResponseBody.self,
                                 from: data
                             )
