@@ -4,6 +4,7 @@ final class SplashViewController: UIViewController {
 
     private let storage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
+    private let profileImageService = ProfileImageService.shared
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -61,13 +62,11 @@ extension SplashViewController: AuthViewControllerDelegate {
         UIBlockingProgressHUD.show()
         profileService.fetchProfile(
             token,
-            completion: { [weak self] profile in
+            completion: { profile in
                 UIBlockingProgressHUD.dismiss()
-                guard let self else { return }
-
                 switch profile {
-                case .success:
-                    switchToTabBarController()
+                case .success(let profle):
+                    self.profileImageService.fetchProfileImage(profle.username, completion: {_ in })
                     Log(.info, "Succesfull request")
                 case .failure:
                     Log(.error, "Error")

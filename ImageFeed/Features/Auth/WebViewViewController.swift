@@ -93,16 +93,16 @@ final class WebViewViewController: UIViewController {
 
 extension WebViewViewController: WKNavigationDelegate {
     private func loadAuthView() {
-        guard var urlComponents = URLComponents(string: Constants.unsplashAuthorizeURLString) else {
-            Log(.error, "Invalid OAuth token URL string: \(Constants.unsplashAuthorizeURLString)")
+        guard var urlComponents = URLComponents(string: API.Endpoints.unsplashAuthorizeURLString) else {
+            Log(.error, "Invalid OAuth token URL string: \(API.Endpoints.unsplashAuthorizeURLString)")
             return
         }
 
         urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: Constants.accessKey),
-            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
+            URLQueryItem(name: "client_id", value: API.keys.accessKey),
+            URLQueryItem(name: "redirect_uri", value: API.keys.redirectURI),
             URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: Constants.accessScope),
+            URLQueryItem(name: "scope", value: API.keys.accessScope),
         ]
 
         guard let url = urlComponents.url else {
