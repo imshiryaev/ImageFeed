@@ -29,7 +29,7 @@ final class ProfileViewController: UIViewController {
 
     private func updateProfileDetails(profile: ProfileViewModel) {
         profileName.text = profile.name
-        profileUsername.text = profile.username
+        profileUsername.text = profile.loginName
         profileDescription.text = profile.bio
     }
 

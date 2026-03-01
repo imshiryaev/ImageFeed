@@ -9,17 +9,15 @@ struct ProfileResult: Decodable {
 
 final class ProfileService {
     private var lastTask: URLSessionTask?
-    private var lastBearer: String?
-    
+
     private(set) var profile: ProfileViewModel?
-    
+
     static let shared = ProfileService()
     private init() {}
-    
 
     private func makeProfileRequest(_ bearer: String) -> URLRequest? {
 
-        guard var urlComponents = URLComponents(string: Constants.defaultBaseURLString) else {
+        guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
             Log(.error, "Invalid base URL")
             return nil
         }
@@ -36,15 +34,16 @@ final class ProfileService {
         return request
     }
 
-    func fetchProfile(_ bearer: String, completion: @escaping (Result<ProfileViewModel, Error>) -> Void) {
+    func fetchProfile(
+        _ bearer: String,
+        completion: @escaping (Result<ProfileViewModel, Error>) -> Void
+    ) {
         guard let request = makeProfileRequest(bearer) else {
             completion(.failure(NetworkError.invalidRequest))
             return
         }
-
-        guard lastTask == nil, lastBearer != bearer else { return }
-        lastBearer = bearer
-
+        lastTask?.cancel()
+        
         let task = URLSession.shared.data(
             for: request,
             completion: { [weak self] result in
@@ -52,29 +51,28 @@ final class ProfileService {
 
                 defer {
                     lastTask = nil
-                    lastBearer = nil
                 }
-
-                self.handleProfileResponse(result, completion: completion)
+                DispatchQueue.main.async {
+                    self.handleProfileResponse(result, completion: completion)
+                }
             }
         )
         lastTask = task
         task.resume()
     }
 
-    func handleProfileResponse(
+    private func handleProfileResponse(
         _ result: Result<Data, Error>,
         completion: @escaping (Result<ProfileViewModel, Error>) -> Void
     ) {
         switch result {
         case .success(let data):
             do {
-                if let json = String(data: data, encoding: .utf8) {
-                    print(json)
-                }
                 let decodedData = try JSONDecoder.snakeCase.decode(ProfileResult.self, from: data)
+
                 let profile = ProfileViewModel(
-                    username: "@\(decodedData.username)",
+                    loginName: "@\(decodedData.username)",
+                    username: decodedData.username,
                     name: decodedData.firstName + " " + decodedData.lastName,
                     bio: decodedData.bio
                 )
