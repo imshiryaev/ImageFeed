@@ -90,22 +90,17 @@ extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         vc.navigationController?.popViewController(animated: true)
         UIBlockingProgressHUD.show()
-
-        OAuth2Service.shared.fetchOAuthToken(
-            code: code,
-            completion: { [weak self] result in
-                UIBlockingProgressHUD.dismiss()
-                guard let self else { return }
-
-                switch result {
-                case .success:
-                    self.delegate?.didAuthenticate(self)
-                    break
-                case .failure:
-                    break
-                }
+        
+        Task {
+            do {
+                try await OAuth2Service.shared.fetchAsyncOAuthToken(code: code)
+                self.delegate?.didAuthenticate(self)
+            } catch {
+                Log(.error, error.localizedDescription)
             }
-        )
+            UIBlockingProgressHUD.dismiss()
+        }
+        
     }
 
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {

@@ -13,6 +13,7 @@ final class ProfileImageService {
     private init() {}
 
     private(set) var avatarURL: String?
+    private var currentTask: Task<Void, Error>?
 
     private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
@@ -28,48 +29,30 @@ final class ProfileImageService {
         return request
     }
 
-    func fetchProfileImage(_ username: String, completion: @escaping (Result<UserResult, Error>) -> Void) {
+    func fetchAsyncProfileImage(username: String) async throws {
         guard let token = UserDefaults.standard.string(forKey: "token") else {
-            return
+            Log(.error, "Token is empty")
+            throw NetworkError.invalidRequest
         }
         guard let request = makeProfileImageRequest(username: username, token: token) else {
-            completion(.failure(NetworkError.invalidRequest))
-            return
+            throw NetworkError.invalidRequest
         }
+        
+        currentTask?.cancel()
+        
+        let task = Task {
+            defer { currentTask = nil }
+            let data = try await URLSession.shared.data(for: request)
 
-        let task = URLSession.shared.data(
-            for: request,
-            completion: { [weak self] result in
-                guard let self else {
-                    return
-                }
-                self.handleProfileImageResponce(result, completion: completion)
-            }
-        )
-        task.resume()
-    }
-
-    func handleProfileImageResponce(
-        _ result: Result<Data, Error>,
-        completion: @escaping (Result<UserResult, Error>) -> Void
-    ) {
-        switch result {
-        case .success(let data):
             do {
                 let user = try JSONDecoder.snakeCase.decode(UserResult.self, from: data)
                 self.avatarURL = user.profileImage.small
-                guard let avatarURL else {
-                    return
-                }
-                completion(.success(user))
             } catch {
                 Log(.error, "Decoding failed: \(error)")
-                completion(.failure(error))
             }
-        case .failure(let error):
-            Log(.error, "Fail: \(error)")
-            completion(.failure(error))
         }
+        
+        currentTask = task
+        try await task.value
     }
-    
 }

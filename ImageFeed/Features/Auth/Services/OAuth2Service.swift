@@ -5,84 +5,40 @@ final class OAuth2Service {
 
     private let tokenStorage = OAuth2TokenStorage()
 
-    private var lastTask: URLSessionTask? = nil
+    private var currentTask: Task<Void, Error>? = nil
     private var lastCode: String? = nil
 
     private init() {}
 
-    func fetchOAuthToken(
-        code: String,
-        completion: @escaping (Result<String, Error>) -> Void
-    ) {
-        assert(Thread.isMainThread)
-
-        guard lastTask == nil else {
-            Log(.error, "Fetch token already in progress")
-            return
+    func fetchAsyncOAuthToken(code: String) async throws {
+        guard let request = makeOAuthTokenRequest(code: code), lastCode != code else {
+            throw NetworkError.invalidRequest
         }
+        
+        currentTask?.cancel()
+        
+        defer { self.lastCode = nil }
+        self.lastCode = code
+        
+        let task = Task {
+            defer { self.currentTask = nil }
+            
+            let data = try await URLSession.shared.data(for: request)
 
-        guard lastCode != code else {
-            completion(.failure(NetworkError.invalidRequest))
-            return
-        }
-
-        lastTask?.cancel()
-        lastCode = code
-
-        guard let request = makeOAuthTokenRequest(code: code) else {
-            completion(.failure(NetworkError.invalidRequest))
-            return
-        }
-
-        let task = URLSession.shared.data(
-            for: request,
-            completion: { [weak self] result in
-                DispatchQueue.main.async {
-                    guard let self else { return }
-
-                    defer {
-                        self.lastTask = nil
-                        self.lastCode = nil
-                    }
-                    self.handleOAuthTokenResponse(result, completion: completion)
-                }
-                #if DEBUG
-                    Log(.debug, "Successfully send request")
-                #endif
-            }
-        )
-        self.lastTask = task
-        task.resume()
-    }
-
-    func handleOAuthTokenResponse(
-        _ result: Result<Data, Error>,
-        completion: @escaping (Result<String, Error>) -> Void
-    ) {
-        switch result {
-        case .success(let data):
             do {
-                let token = try JSONDecoder.snakeCase.decode(
-                    OAuthTokenResponseBody.self,
-                    from: data
-                )
+                let token = try JSONDecoder.snakeCase.decode(OAuthTokenResponseBody.self, from: data)
                 self.tokenStorage.setToken(token.accessToken)
-                completion(.success(token.accessToken))
 
-                #if DEBUG
-                    Log(.debug, "Successfully decoded access token")
-                #endif
             } catch {
-                completion(
-                    .failure(NetworkError.decodingError(error))
-                )
                 Log(.error, "Decoding failed: \(error)")
+                throw NetworkError.decodingError(error)
             }
-        case .failure(let error):
-            completion(.failure(error))
         }
+        
+        self.currentTask = task
+        try await task.value
     }
-
+    
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard
             var urlComponents = URLComponents(

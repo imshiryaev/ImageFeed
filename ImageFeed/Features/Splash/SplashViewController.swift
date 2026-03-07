@@ -60,19 +60,23 @@ extension SplashViewController: AuthViewControllerDelegate {
 
     func fetchProfile(token: String) {
         UIBlockingProgressHUD.show()
-        profileService.fetchProfile(
-            token,
-            completion: { profile in
-                UIBlockingProgressHUD.dismiss()
-                switch profile {
-                case .success(let profle):
-                    self.profileImageService.fetchProfileImage(profle.username, completion: {_ in })
-                    Log(.info, "Succesfull request")
-                case .failure:
-                    Log(.error, "Error")
-                }
-            }
-        )
-    }
 
+        Task {
+            defer { UIBlockingProgressHUD.dismiss() }
+
+            do {
+                try await self.profileService.fetchAsyncProfile(token: token)
+
+                guard let profile = self.profileService.profile else {
+                    Log(.error, "Profile is nil")
+                    return
+                }
+
+                try await self.profileImageService.fetchAsyncProfileImage(username: profile.username)
+
+            } catch {
+                Log(.error, "\(error)")
+            }
+        }
+    }
 }
