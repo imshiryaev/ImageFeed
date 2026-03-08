@@ -10,9 +10,8 @@ final class SplashViewController: UIViewController {
         super.viewDidAppear(animated)
 
         if let token = storage.token {
-
-            fetchProfile(token: token)
             switchToTabBarController()
+            fetchProfile(token: token)
 
         } else {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -73,7 +72,7 @@ extension SplashViewController: AuthViewControllerDelegate {
                 }
 
                 try await self.profileImageService.fetchAsyncProfileImage(username: profile.username)
-
+                switchToTabBarController()
             } catch {
                 Log(.error, "\(error)")
             }

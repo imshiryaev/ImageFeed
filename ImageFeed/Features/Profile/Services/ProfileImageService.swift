@@ -14,6 +14,8 @@ final class ProfileImageService {
 
     private(set) var avatarURL: String?
     private var currentTask: Task<Void, Error>?
+    
+    static let didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
 
     private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
@@ -47,6 +49,12 @@ final class ProfileImageService {
             do {
                 let user = try JSONDecoder.snakeCase.decode(UserResult.self, from: data)
                 self.avatarURL = user.profileImage.small
+                
+                NotificationCenter.default.post(
+                    name: ProfileImageService.didChangeProfileImageURL,
+                    object: self,
+                    userInfo: ["URL": user.profileImage.small]
+                )
             } catch {
                 Log(.error, "Decoding failed: \(error)")
             }
