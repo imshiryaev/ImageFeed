@@ -43,7 +43,7 @@ final class AuthViewController: UIViewController {
 
                 guard let webViewVC else { return }
                 webViewVC.delegate = self
-
+                
                 self.navigationController?.pushViewController(webViewVC, animated: true)
             },
             for: .touchUpInside

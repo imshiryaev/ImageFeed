@@ -5,6 +5,26 @@ final class SplashViewController: UIViewController {
     private let storage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
     private let profileImageService = ProfileImageService.shared
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        view.addSubview(imageView)
+        imageView.image = UIImage(resource: .splash)
+        
+        
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+                
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+        ])
+        return imageView
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        _ = imageView
+    }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -27,8 +47,14 @@ final class SplashViewController: UIViewController {
                 authViewVC,
                 animated: false
             )
+            
+            let navController = UINavigationController(rootViewController: authViewVC)
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: false)
         }
     }
+    
+    
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
