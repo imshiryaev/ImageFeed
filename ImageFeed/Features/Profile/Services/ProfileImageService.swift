@@ -17,25 +17,7 @@ final class ProfileImageService {
 
     static let didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
 
-    private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
-        guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
-            return nil
-        }
-        urlComponents.path = "/users/\(username)"
-
-        guard let url = urlComponents.url else { return nil }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        return request
-    }
-
-    func fetchAsyncProfileImage(username: String) async throws {
-        guard let token = UserDefaults.standard.string(forKey: "token") else {
-            Log(.error, "Token is empty")
-            throw NetworkError.invalidRequest
-        }
+    func fetchAsyncProfileImage(username: String, token: String) async throws {
         guard let request = makeProfileImageRequest(username: username, token: token) else {
             throw NetworkError.invalidRequest
         }
@@ -58,4 +40,19 @@ final class ProfileImageService {
         currentTask = task
         try await task.value
     }
+
+    private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
+        guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
+            return nil
+        }
+        urlComponents.path = "/users/\(username)"
+
+        guard let url = urlComponents.url else { return nil }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+
 }

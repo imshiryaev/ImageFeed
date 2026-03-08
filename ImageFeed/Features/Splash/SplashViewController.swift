@@ -71,7 +71,10 @@ extension SplashViewController: AuthViewControllerDelegate {
                     return
                 }
 
-                try await self.profileImageService.fetchAsyncProfileImage(username: profile.username)
+                try await self.profileImageService.fetchAsyncProfileImage(
+                    username: profile.username,
+                    token: token
+                )
                 switchToTabBarController()
             } catch {
                 Log(.error, "\(error)")

@@ -1,3 +1,4 @@
+import Kingfisher
 import UIKit
 
 final class ProfileViewController: UIViewController {
@@ -8,17 +9,16 @@ final class ProfileViewController: UIViewController {
     private let profileDescription = UILabel()
     private let profileExitButton = UIButton()
 
-    private let storage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
     private var profileImageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        
+
         guard let profile = profileService.profile else { return }
         updateProfileDetails(profile: profile)
-        
+
         profileImageObserver = NotificationCenter.default.addObserver(
             forName: ProfileImageService.didChangeProfileImageURL,
             object: nil,
@@ -28,6 +28,7 @@ final class ProfileViewController: UIViewController {
                 self.updateProfileImage()
             }
         )
+        updateProfileImage()
     }
 
     private func setupUI() {
@@ -37,8 +38,14 @@ final class ProfileViewController: UIViewController {
         setupProfileDescription()
         setupExitProfileButton()
     }
-    
+
     private func updateProfileImage() {
+        guard let imageUrl = ProfileImageService.shared.avatarURL else {
+            return
+        }
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 20)
+        profileImageView.kf.setImage(with: URL(string: imageUrl), options: [.processor(processor)])
         
     }
 

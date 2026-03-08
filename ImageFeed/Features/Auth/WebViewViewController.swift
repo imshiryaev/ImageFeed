@@ -84,7 +84,7 @@ extension WebViewViewController: WKNavigationDelegate {
             Log(.error, "Invalid URL")
             return
         }
-
+        
         let request = URLRequest(url: url)
         webView.load(request)
     }
