@@ -17,9 +17,10 @@ extension URLSession {
                 throw NetworkError.urlSessionError
             }
             guard 200..<300 ~= statusCode else {
+                Log(.error, NetworkError.httpStatusCode(statusCode).localizedDescription)
                 throw NetworkError.httpStatusCode(statusCode)
             }
-
+            
             do {
                 return try JSONDecoder.snakeCase.decode(T.self, from: data)
 
@@ -32,6 +33,7 @@ extension URLSession {
             throw error
 
         } catch {
+            Log(.error, "Ошибка: \(error.localizedDescription)")
             throw NetworkError.urlRequestError(error)
         }
     }
