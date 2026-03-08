@@ -37,6 +37,8 @@ final class ProfileViewController: UIViewController {
         setupProfileUsername()
         setupProfileDescription()
         setupExitProfileButton()
+        
+        view.backgroundColor = .background
     }
 
     private func updateProfileImage() {
