@@ -14,31 +14,23 @@ final class OAuth2Service {
         guard let request = makeOAuthTokenRequest(code: code), lastCode != code else {
             throw NetworkError.invalidRequest
         }
-        
+
         currentTask?.cancel()
-        
+
         defer { self.lastCode = nil }
         self.lastCode = code
-        
+
         let task = Task {
             defer { self.currentTask = nil }
-            
-            let data = try await URLSession.shared.data(for: request)
 
-            do {
-                let token = try JSONDecoder.snakeCase.decode(OAuthTokenResponseBody.self, from: data)
-                self.tokenStorage.setToken(token.accessToken)
-
-            } catch {
-                Log(.error, "Decoding failed: \(error)")
-                throw NetworkError.decodingError(error)
-            }
+            let data: OAuthTokenResponseBody = try await URLSession.shared.data(for: request)
+            self.tokenStorage.setToken(data.accessToken)
         }
-        
+
         self.currentTask = task
         try await task.value
     }
-    
+
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard
             var urlComponents = URLComponents(

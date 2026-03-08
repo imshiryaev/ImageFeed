@@ -14,7 +14,7 @@ final class ProfileImageService {
 
     private(set) var avatarURL: String?
     private var currentTask: Task<Void, Error>?
-    
+
     static let didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
 
     private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
@@ -39,27 +39,22 @@ final class ProfileImageService {
         guard let request = makeProfileImageRequest(username: username, token: token) else {
             throw NetworkError.invalidRequest
         }
-        
+
         currentTask?.cancel()
-        
+
         let task = Task {
             defer { currentTask = nil }
-            let data = try await URLSession.shared.data(for: request)
 
-            do {
-                let user = try JSONDecoder.snakeCase.decode(UserResult.self, from: data)
-                self.avatarURL = user.profileImage.small
-                
-                NotificationCenter.default.post(
-                    name: ProfileImageService.didChangeProfileImageURL,
-                    object: self,
-                    userInfo: ["URL": user.profileImage.small]
-                )
-            } catch {
-                Log(.error, "Decoding failed: \(error)")
-            }
+            let data: UserResult = try await URLSession.shared.data(for: request)
+            self.avatarURL = data.profileImage.small
+
+            NotificationCenter.default.post(
+                name: ProfileImageService.didChangeProfileImageURL,
+                object: self,
+                userInfo: ["URL": data.profileImage.small]
+            )
         }
-        
+
         currentTask = task
         try await task.value
     }

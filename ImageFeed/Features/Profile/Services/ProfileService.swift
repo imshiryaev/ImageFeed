@@ -12,7 +12,7 @@ final class ProfileService {
     private init() {}
 
     private(set) var profile: ProfileViewModel?
-    
+
     private var currentTask: Task<Void, Error>?
 
     func fetchAsyncProfile(token: String) async throws {
@@ -21,31 +21,25 @@ final class ProfileService {
         }
 
         currentTask?.cancel()
-        
+
         let task = Task {
             defer { currentTask = nil }
-            
-            let data = try await URLSession.shared.data(for: request)
-            do {
-                let decodedData = try JSONDecoder.snakeCase.decode(ProfileResult.self, from: data)
 
-                let profile = ProfileViewModel(
-                    loginName: "@\(decodedData.username)",
-                    username: decodedData.username,
-                    name: decodedData.firstName + " " + decodedData.lastName,
-                    bio: decodedData.bio
-                )
-                self.profile = profile
-            } catch {
-                Log(.error, "Decoding failed: \(error)")
-                throw NetworkError.decodingError(error)
-            }
+            let data: ProfileResult = try await URLSession.shared.data(for: request)
+
+            let profile = ProfileViewModel(
+                loginName: "@\(data.username)",
+                username: data.username,
+                name: data.firstName + " " + data.lastName,
+                bio: data.bio
+            )
+            self.profile = profile
         }
-        
+
         currentTask = task
         try await task.value
     }
-    
+
     private func makeProfileRequest(_ bearer: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
             Log(.error, "Invalid base URL")
