@@ -8,12 +8,15 @@ protocol OAuth2TokenStorageProtocol {
 
 final class OAuth2TokenStorage: OAuth2TokenStorageProtocol {
 
+    static let shared = OAuth2TokenStorage()
+
+    private let storage = KeychainWrapper.standard
+
     private enum Keys: String {
         case token
     }
 
-    private let storage = KeychainWrapper.standard
-    
+    private init() {}
 
     var token: String? {
         storage.string(forKey: Keys.token.rawValue)

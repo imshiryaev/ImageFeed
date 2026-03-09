@@ -36,7 +36,7 @@ final class WebViewViewController: UIViewController {
             \.estimatedProgress,
             options: [],
             changeHandler: { [weak self] _, _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.updateProgress()
             }
         )
@@ -74,10 +74,10 @@ extension WebViewViewController: WKNavigationDelegate {
         }
 
         urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: API.keys.accessKey),
-            URLQueryItem(name: "redirect_uri", value: API.keys.redirectURI),
+            URLQueryItem(name: "client_id", value: API.Keys.accessKey),
+            URLQueryItem(name: "redirect_uri", value: API.Keys.redirectURI),
             URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: API.keys.accessScope),
+            URLQueryItem(name: "scope", value: API.Keys.accessScope),
         ]
 
         guard let url = urlComponents.url else {

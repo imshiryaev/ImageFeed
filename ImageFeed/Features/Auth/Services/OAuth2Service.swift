@@ -3,9 +3,9 @@ import Foundation
 final class OAuth2Service {
     static let shared = OAuth2Service()
 
-    private let tokenStorage = OAuth2TokenStorage()
+    private let tokenStorage = OAuth2TokenStorage.shared
 
-    private var currentTask: Task<Void, Error>? = nil
+    private var currentTask: Task<Void, Error>?
     private var lastCode: String? = nil
 
     private init() {}
@@ -44,9 +44,9 @@ final class OAuth2Service {
             return nil
         }
         urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: API.keys.accessKey),
-            URLQueryItem(name: "client_secret", value: API.keys.secretKey),
-            URLQueryItem(name: "redirect_uri", value: API.keys.redirectURI),
+            URLQueryItem(name: "client_id", value: API.Keys.accessKey),
+            URLQueryItem(name: "client_secret", value: API.Keys.secretKey),
+            URLQueryItem(name: "redirect_uri", value: API.Keys.redirectURI),
             URLQueryItem(name: "code", value: code),
             URLQueryItem(name: "grant_type", value: "authorization_code"),
         ]

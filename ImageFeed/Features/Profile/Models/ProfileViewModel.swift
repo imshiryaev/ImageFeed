@@ -1,8 +1,6 @@
-import UIKit
-
 struct ProfileViewModel {
-    var loginName: String
-    var username: String
-    var name: String
-    var bio: String?
+    let loginName: String
+    let username: String
+    let name: String
+    let bio: String?
 }
