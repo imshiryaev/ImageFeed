@@ -5,26 +5,26 @@ protocol AuthViewControllerDelegate: AnyObject {
 }
 
 final class AuthViewController: UIViewController {
-    
+
     var delegate: AuthViewControllerDelegate?
-    
+
     private let authButton = UIButton()
     private let authLogo = UIImageView()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        
+
         navigationItem.hidesBackButton = true
     }
-    
+
     private func setupUI() {
         view.backgroundColor = .background
         setupAuthButton()
         setupAuthLogo()
         setupBackButton()
     }
-    
+
     private func setupAuthButton() {
         view.addSubview(authButton)
         authButton.setTitle("Войти", for: .normal)
@@ -35,10 +35,12 @@ final class AuthViewController: UIViewController {
         authButton.addAction(
             UIAction { [weak self] _ in
                 guard let self else { return }
-                
+
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let webViewVC = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as? WebViewViewController
-                
+                let webViewVC =
+                    storyboard.instantiateViewController(withIdentifier: "WebViewViewController")
+                    as? WebViewViewController
+
                 guard let webViewVC else { return }
                 webViewVC.delegate = self
                 
@@ -46,55 +48,75 @@ final class AuthViewController: UIViewController {
             },
             for: .touchUpInside
         )
-        
+
         authButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             authButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             authButton.heightAnchor.constraint(equalToConstant: 48),
             authButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90),
-            authButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            authButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
+            authButton.leadingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                constant: 16
+            ),
+            authButton.trailingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                constant: -16
+            ),
         ])
     }
-    
+
     private func setupAuthLogo() {
         view.addSubview(authLogo)
         authLogo.image = UIImage(resource: .authScreenLogo)
-        
+
         authLogo.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             authLogo.widthAnchor.constraint(equalToConstant: 60),
             authLogo.heightAnchor.constraint(equalToConstant: 60),
             authLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            authLogo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 236)
+            authLogo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 236),
         ])
     }
-    
+
     private func setupBackButton() {
         navigationController?.navigationBar.backIndicatorImage = UIImage(resource: .back)
         navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(resource: .back)
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = .background
     }
+    
+    func showErrorAlert() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert
+        )
+        
+        let action = UIAlertAction(title: "OK", style: .cancel)
+        alert.addAction(action)
+        
+        present(alert, animated: true)
+    }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        vc.navigationController?.popViewController(animated: false)
+        vc.navigationController?.popViewController(animated: true)
+        UIBlockingProgressHUD.show()
         
-        OAuth2Service.shared.fetchOAuthToken(code: code, completion: { [weak self] result in
-            guard let self else { return }
-
-            switch result {
-            case .success(_):
+        Task {
+            do {
+                try await OAuth2Service.shared.fetchAsyncOAuthToken(code: code)
                 self.delegate?.didAuthenticate(self)
-                break
-            case .failure(_):
-                break
+            } catch {
+                Log(.error, error.localizedDescription)
+                showErrorAlert()
             }
-        })
+            UIBlockingProgressHUD.dismiss()
+        }
+        
     }
-    
+
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         vc.navigationController?.popViewController(animated: true)
     }
