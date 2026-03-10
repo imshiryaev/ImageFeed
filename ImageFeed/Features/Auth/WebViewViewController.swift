@@ -30,8 +30,10 @@ final class WebViewViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         loadAuthView()
-
-        webView.navigationDelegate = self
+        setUpObservation()
+    }
+    
+    private func setUpObservation() {
         estimatedProgressObservation = webView.observe(
             \.estimatedProgress,
             options: [],
@@ -43,6 +45,7 @@ final class WebViewViewController: UIViewController {
     }
 
     private func setupUI() {
+        view.backgroundColor = .white
         setupWebView()
         _ = progressView
     }
@@ -55,7 +58,9 @@ final class WebViewViewController: UIViewController {
     private func setupWebView() {
         view.addSubview(webView)
         webView.backgroundColor = .white
-
+        webView.navigationDelegate = self
+        webView.scrollView.bounces = false
+        
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -84,7 +89,7 @@ extension WebViewViewController: WKNavigationDelegate {
             Log(.error, "Invalid URL")
             return
         }
-        
+
         let request = URLRequest(url: url)
         webView.load(request)
     }

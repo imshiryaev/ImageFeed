@@ -14,8 +14,6 @@ final class AuthViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-
-        navigationItem.hidesBackButton = true
     }
 
     private func setupUI() {
@@ -36,12 +34,7 @@ final class AuthViewController: UIViewController {
             UIAction { [weak self] _ in
                 guard let self else { return }
 
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                let webViewVC =
-                    storyboard.instantiateViewController(withIdentifier: "WebViewViewController")
-                    as? WebViewViewController
-
-                guard let webViewVC else { return }
+                let webViewVC = WebViewViewController()
                 webViewVC.delegate = self
                 
                 self.navigationController?.pushViewController(webViewVC, animated: true)

@@ -37,7 +37,7 @@ final class ProfileViewController: UIViewController {
         setupProfileUsername()
         setupProfileDescription()
         setupExitProfileButton()
-        
+
         view.backgroundColor = .background
     }
 
@@ -45,10 +45,10 @@ final class ProfileViewController: UIViewController {
         guard let imageUrl = ProfileImageService.shared.avatarURL else {
             return
         }
-        
+
         let processor = RoundCornerImageProcessor(cornerRadius: 20)
         profileImageView.kf.setImage(with: URL(string: imageUrl), options: [.processor(processor)])
-        
+
     }
 
     private func updateProfileDetails(profile: ProfileViewModel) {
