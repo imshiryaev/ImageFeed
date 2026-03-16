@@ -11,8 +11,10 @@ final class OAuth2Service {
     private init() {}
 
     func fetchAsyncOAuthToken(code: String) async throws {
-        guard let request = makeOAuthTokenRequest(code: code), lastCode != code else {
-            throw NetworkError.invalidRequest
+        let request = makeOAuthTokenRequest(code: code)
+        
+        guard lastCode != code else {
+            return
         }
 
         currentTask?.cancel()
@@ -31,32 +33,17 @@ final class OAuth2Service {
         try await task.value
     }
 
-    private func makeOAuthTokenRequest(code: String) -> URLRequest? {
-        guard
-            var urlComponents = URLComponents(
-                string: API.Endpoints.unsplashOauthTokenURLString
-            )
-        else {
-            Log(
-                .error,
-                "Invalid OAuth token URL string: \(API.Endpoints.unsplashOauthTokenURLString)"
-            )
-            return nil
-        }
-        urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: API.Keys.accessKey),
-            URLQueryItem(name: "client_secret", value: API.Keys.secretKey),
-            URLQueryItem(name: "redirect_uri", value: API.Keys.redirectURI),
-            URLQueryItem(name: "code", value: code),
-            URLQueryItem(name: "grant_type", value: "authorization_code"),
-        ]
-
-        guard let url = urlComponents.url else {
-            Log(.error, "Invalid URL")
-            return nil
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        return request
+    private func makeOAuthTokenRequest(code: String) -> URLRequest {
+        URLRequestBuilder(baseURL: API.Endpoint.unsplashOauthTokenURLString)
+            .method(.post)
+            .queryItems([
+                URLQueryItem(name: "client_id", value: API.Key.accessKey),
+                URLQueryItem(name: "client_secret", value: API.Key.secretKey),
+                URLQueryItem(name: "redirect_uri", value: API.Key.redirectURI),
+                URLQueryItem(name: "code", value: code),
+                URLQueryItem(name: "grant_type", value: "authorization_code"),
+            ])
+            .build()
     }
+
 }

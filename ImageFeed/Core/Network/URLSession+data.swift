@@ -5,9 +5,7 @@ enum NetworkError: Error {
     case urlRequestError(Error)
     case urlSessionError
     case invalidRequest
-    case decodingError(Error)
 }
-
 extension URLSession {
     func data<T: Decodable>(for request: URLRequest) async throws -> T {
         do {
@@ -20,16 +18,14 @@ extension URLSession {
                 Log(.error, NetworkError.httpStatusCode(statusCode).localizedDescription)
                 throw NetworkError.httpStatusCode(statusCode)
             }
-            
-            do {
-                return try JSONDecoder.snakeCase.decode(T.self, from: data)
 
-            } catch {
-                Log(.error, "Decoding failed: \(error)")
-                throw NetworkError.decodingError(error)
-            }
+            return try JSONDecoder.snakeCase.decode(T.self, from: data)
 
         } catch let error as NetworkError {
+            throw error
+
+        } catch let error as DecodingError {
+            Log(.error, "Decoding failed: \(error)")
             throw error
 
         } catch {

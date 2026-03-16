@@ -16,10 +16,8 @@ final class ProfileService {
     private var currentTask: Task<Void, Error>?
 
     func fetchAsyncProfile(token: String) async throws {
-        guard let request = makeProfileRequest(token) else {
-            throw NetworkError.invalidRequest
-        }
-
+        let request = makeProfileRequest(token)
+        
         currentTask?.cancel()
 
         let task = Task {
@@ -40,21 +38,10 @@ final class ProfileService {
         try await task.value
     }
 
-    private func makeProfileRequest(_ bearer: String) -> URLRequest? {
-        guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
-            Log(.error, "Invalid base URL")
-            return nil
-        }
-        urlComponents.path = "/me"
-
-        guard let url = urlComponents.url else {
-            Log(.error, "Invalid URL")
-            return nil
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
-        return request
+    private func makeProfileRequest(_ token: String) -> URLRequest {
+        URLRequestBuilder(baseURL: API.Endpoint.defaultBaseURLString)
+            .bearer(token)
+            .path(API.Path.me)
+            .build()
     }
 }
