@@ -70,7 +70,7 @@ extension SplashViewController: AuthViewControllerDelegate {
 
             do {
                 try await self.profileService.fetchAsyncProfile(token: token)
-
+                
                 guard let profile = self.profileService.profile else {
                     Log(.error, "Profile is nil")
                     return

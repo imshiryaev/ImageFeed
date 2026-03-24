@@ -1,51 +1,17 @@
 import CoreGraphics
 import Foundation
 
-struct PhotoDto: Decodable {
-    let id: String
-    let createdAt: String
-    let updatedAt: String
-    let width: Int
-    let height: Int
-    let color: String
-    let blurHash: String
-    let likes: Int
-    let likedByUser: Bool
-    let description: String?
-    let urls: PhotoUrlsDto
-
-    var toPhoto: Photo {
-        Photo(
-            id: id,
-            size: CGSize(width: width, height: height),
-            createdAt: createdAt,
-            welcomeDescription: description,
-            thumbImageURL: urls.thumb,
-            largeImageURL: urls.full,
-            isLiked: likedByUser
-        )
-    }
-}
-
-struct PhotoUrlsDto: Decodable {
-    let raw: String
-    let full: String
-    let regular: String
-    let small: String
-    let thumb: String
-}
-
-final class ImagesListService {
-    private var photos: [Photo] = []
+final class ImagesListService: ImagesListServiceProtocol {
+    private let useMock = true
+    private(set) var photos: [Photo] = []
 
     private var lastLoadedPage: Int?
     private var currentTask: Task<Void, Error>?
 
-    static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
-
     func fetchPhotosNextPage(token: String) async throws {
         if let task = currentTask {
             task.cancel()
+            currentTask = nil
         }
 
         let task = Task {
@@ -62,7 +28,7 @@ final class ImagesListService {
                 lastLoadedPage = nextPage
 
                 NotificationCenter.default.post(
-                    name: ImagesListService.didChangeNotification,
+                    name: .imagesListDidChange,
                     object: self,
                     userInfo: ["Photos": photos]
                 )
@@ -74,6 +40,25 @@ final class ImagesListService {
         try await task.value
     }
 
+    func changeLike(photoId: String, isLike: Bool, token: String) {
+        Task {
+            let request = makeLikePhotoRequest(photoId: photoId, isLike: isLike, token: token)
+
+            _ = try await URLSession.shared.data(for: request)
+
+            if let index = photos.firstIndex(where: { $0.id == photoId }) {
+                photos[index].isLiked.toggle()
+
+                NotificationCenter.default.post(
+                    name: .imagesListDidChange,
+                    object: self,
+                    userInfo: ["photoId": photos[index].id]
+                )
+            }
+
+        }
+    }
+
     private func makePhotosRequest(token: String, nextPage: Int = 1, itemsPerPage: Int = 10) -> URLRequest {
         URLRequestBuilder(baseURL: API.Endpoint.defaultBaseURLString)
             .bearer(token)
@@ -82,6 +67,14 @@ final class ImagesListService {
                 URLQueryItem(name: "per_page", value: "\(itemsPerPage)"),
             ])
             .path(API.Path.photos)
+            .build()
+    }
+
+    private func makeLikePhotoRequest(photoId: String, isLike: Bool, token: String) -> URLRequest {
+        URLRequestBuilder(baseURL: API.Endpoint.defaultBaseURLString)
+            .path(API.Path.like(photoId))
+            .bearer(token)
+            .method(isLike ? .delete : .post)
             .build()
     }
 }

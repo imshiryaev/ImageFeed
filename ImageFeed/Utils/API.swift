@@ -14,5 +14,6 @@ enum API {
         static let me = "/me"
         static let photos = "/photos"
         static func users(_ username: String) -> String { "/users/\(username)" }
+        static func like(_ photoId: String) -> String { "/photos/\(photoId)/like" }
     }
 }

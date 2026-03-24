@@ -8,8 +8,10 @@ enum NetworkError: Error {
 }
 extension URLSession {
     func data<T: Decodable>(for request: URLRequest) async throws -> T {
+        try Task.checkCancellation()
+        
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await self.data(for: request)
 
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode else {
                 throw NetworkError.urlSessionError
@@ -22,6 +24,7 @@ extension URLSession {
             return try JSONDecoder.snakeCase.decode(T.self, from: data)
 
         } catch let error as NetworkError {
+            Log(.error, "\(error)")
             throw error
 
         } catch let error as DecodingError {
