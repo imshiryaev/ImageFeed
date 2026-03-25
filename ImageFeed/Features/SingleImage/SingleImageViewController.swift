@@ -1,22 +1,12 @@
+import Kingfisher
 import UIKit
 
 final class SingleImageViewController: UIViewController {
-    var image: UIImage? {
-        didSet {
-            guard isViewLoaded, let image else { return }
 
-            imageView.image = image
-            imageView.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
+    var imageUrl: URL?
 
     private lazy var imageView: UIImageView = {
         var imageView = UIImageView()
-
-        guard let image else { return imageView }
-        imageView.image = image
-        imageView.frame.size = image.size
 
         scrollView.addSubview(imageView)
         return imageView
@@ -109,6 +99,7 @@ final class SingleImageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpUI()
+        loadImage()
         navigationController?.navigationBar.isHidden = true
     }
 
@@ -118,13 +109,23 @@ final class SingleImageViewController: UIViewController {
         _ = imageView
         _ = backButton
         _ = shareButton
-
-        guard let image else { return }
-        rescaleAndCenterImageInScrollView(image: image)
     }
-    func tapOnShareButton() {
 
-        guard let image else { return }
+    private func loadImage() {
+        UIBlockingProgressHUD.show()
+        imageView.kf.setImage(with: imageUrl) { result in
+            switch result {
+            case .success(let value):
+                self.imageView.frame.size = value.image.size
+                self.rescaleAndCenterImageInScrollView(image: value.image)
+            case .failure: break
+            }
+            UIBlockingProgressHUD.dismiss()
+        }
+    }
+
+    func tapOnShareButton() {
+        guard let image = imageView.image else { return }
         let activityItems: [Any] = [image]
 
         let share = UIActivityViewController(
@@ -181,7 +182,7 @@ extension SingleImageViewController: UIScrollViewDelegate {
         with view: UIView?,
         atScale scale: CGFloat
     ) {
-        guard let image else { return }
+        guard let image = imageView.image else { return }
         centerImageAfterZoom(image: image)
     }
 }

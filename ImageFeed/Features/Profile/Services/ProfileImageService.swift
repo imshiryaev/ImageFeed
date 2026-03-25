@@ -16,6 +16,10 @@ final class ProfileImageService {
     private var currentTask: Task<Void, Error>?
 
     static let didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
+    
+    func reset() {
+        avatarURL = nil
+    }
 
     func fetchAsyncProfileImage(username: String, token: String) async throws {
         let request = makeProfileImageRequest(username: username, token: token)

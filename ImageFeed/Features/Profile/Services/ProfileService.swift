@@ -14,6 +14,10 @@ final class ProfileService {
     private(set) var profile: ProfileViewModel?
 
     private var currentTask: Task<Void, Error>?
+    
+    func reset() {
+        profile = nil
+    }
 
     func fetchAsyncProfile(token: String) async throws {
         let request = makeProfileRequest(token)

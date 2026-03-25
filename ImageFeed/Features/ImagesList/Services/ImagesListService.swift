@@ -2,11 +2,19 @@ import CoreGraphics
 import Foundation
 
 final class ImagesListService: ImagesListServiceProtocol {
+    static let shared = ImagesListService()
+
     private let useMock = true
     private(set) var photos: [Photo] = []
 
     private var lastLoadedPage: Int?
     private var currentTask: Task<Void, Error>?
+
+    private init() {}
+
+    func reset() {
+        photos.removeAll()
+    }
 
     func fetchPhotosNextPage(token: String) async throws {
         if let task = currentTask {

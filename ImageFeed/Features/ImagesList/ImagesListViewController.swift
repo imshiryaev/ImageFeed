@@ -7,7 +7,7 @@ final class ImagesListViewController: UIViewController {
 
     private var photos: [Photo] = []
     private var imageListViewObserver: NSObjectProtocol?
-    private let imagesListService: ImagesListServiceProtocol = ImagesListService()
+    private let imagesListService: ImagesListServiceProtocol = ImagesListService.shared
     private let storage = OAuth2TokenStorage.shared
 
     private lazy var dateFormatter: DateFormatter = {
@@ -137,10 +137,9 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let singleImageVC = SingleImageViewController()
-        let cell = tableView.cellForRow(at: indexPath) as? ImagesListCell
-        let image = cell?.cellImage.image
+        let imageUrl = URL(string: photos[indexPath.row].largeImageURL)
 
-        singleImageVC.image = image
+        singleImageVC.imageUrl = imageUrl
         singleImageVC.modalPresentationStyle = .fullScreen
         present(singleImageVC, animated: true)
     }
