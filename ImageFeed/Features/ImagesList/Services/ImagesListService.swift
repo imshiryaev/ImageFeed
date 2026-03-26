@@ -48,23 +48,21 @@ final class ImagesListService: ImagesListServiceProtocol {
         try await task.value
     }
 
-    func changeLike(photoId: String, isLike: Bool, token: String) {
-        Task {
-            let request = makeLikePhotoRequest(photoId: photoId, isLike: isLike, token: token)
+    func changeLike(photoId: String, isLike: Bool, token: String) async throws {
+        let request = makeLikePhotoRequest(photoId: photoId, isLike: isLike, token: token)
 
-            _ = try await URLSession.shared.data(for: request)
+        _ = try await URLSession.shared.data(for: request)
 
-            if let index = photos.firstIndex(where: { $0.id == photoId }) {
-                photos[index].isLiked.toggle()
+        if let index = photos.firstIndex(where: { $0.id == photoId }) {
+            photos[index].isLiked.toggle()
 
-                NotificationCenter.default.post(
-                    name: .imagesListDidChange,
-                    object: self,
-                    userInfo: ["photoId": photos[index].id]
-                )
-            }
-
+            NotificationCenter.default.post(
+                name: .imagesListDidChange,
+                object: self,
+                userInfo: ["photoId": photos[index].id]
+            )
         }
+
     }
 
     private func makePhotosRequest(token: String, nextPage: Int = 1, itemsPerPage: Int = 10) -> URLRequest {

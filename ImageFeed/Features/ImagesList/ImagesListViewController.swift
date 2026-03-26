@@ -47,14 +47,10 @@ final class ImagesListViewController: UIViewController {
         } else {
             guard let userInfo = notificaton.userInfo else { return }
             let id = userInfo["photoId"] as? String
-            
+
             guard let index = photos.firstIndex(where: { $0.id == id }) else { return }
             let indexPath = IndexPath(row: index, section: 0)
             tableView.reloadRows(at: [indexPath], with: .automatic)
-            
-            if let cell = self.tableView.cellForRow(at: indexPath) as? ImagesListCell {
-                cell.setLikeButtonEnabled(true)
-            }
         }
     }
 
@@ -109,12 +105,25 @@ extension ImagesListViewController: UITableViewDataSource {
 
         cell.onTapLikeButton = { [weak self] in
             guard let self, let token = storage.token else { return }
-            
+
             cell.setLikeButtonEnabled(false)
+            UIBlockingProgressHUD.show()
 
             let current = self.photos[indexPath.row]
-            
-            self.imagesListService.changeLike(photoId: current.id, isLike: current.isLiked, token: token)
+
+            Task {
+                defer {
+                    cell.setLikeButtonEnabled(true)
+                    UIBlockingProgressHUD.dismiss()
+                }
+
+                try await self.imagesListService.changeLike(
+                    photoId: current.id,
+                    isLike: current.isLiked,
+                    token: token
+                )
+
+            }
         }
 
         return cell
