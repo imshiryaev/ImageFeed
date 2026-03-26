@@ -45,7 +45,7 @@ final class SplashViewController: UIViewController {
 
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
-        vc.navigationController?.popViewController(animated: true)
+        vc.dismiss(animated: true)
 
         guard let token = storage.token else { return }
         fetchProfile(token: token)
