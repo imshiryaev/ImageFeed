@@ -3,15 +3,10 @@ import UIKit
 
 final class UIBlockingProgressHUD {
     private static var window: UIWindow? {
-        guard
-            let windowScene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive })
-                as? UIWindowScene
-        else {
-            assertionFailure("Invalid window configuration")
-            return nil
-        }
-        return windowScene.windows.first(where: { $0.isKeyWindow })
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
     }
 
     static func show() {

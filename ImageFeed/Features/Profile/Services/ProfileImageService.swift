@@ -16,11 +16,13 @@ final class ProfileImageService {
     private var currentTask: Task<Void, Error>?
 
     static let didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
+    
+    func reset() {
+        avatarURL = nil
+    }
 
     func fetchAsyncProfileImage(username: String, token: String) async throws {
-        guard let request = makeProfileImageRequest(username: username, token: token) else {
-            throw NetworkError.invalidRequest
-        }
+        let request = makeProfileImageRequest(username: username, token: token)
 
         currentTask?.cancel()
 
@@ -41,18 +43,11 @@ final class ProfileImageService {
         try await task.value
     }
 
-    private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
-        guard var urlComponents = URLComponents(string: API.Endpoints.defaultBaseURLString) else {
-            return nil
-        }
-        urlComponents.path = "/users/\(username)"
-
-        guard let url = urlComponents.url else { return nil }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        return request
+    private func makeProfileImageRequest(username: String, token: String) -> URLRequest {
+        URLRequestBuilder(baseURL: API.Endpoint.defaultBaseURLString)
+            .bearer(token)
+            .path(API.Path.users(username))
+            .build()
     }
 
 }

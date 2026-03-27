@@ -1,13 +1,19 @@
 enum API {
-    enum Keys {
+    enum Key {
         static let accessKey = "J40xwnkorlfopGUjttlAJf21zmxjQY-1w-rMlnjpToQ"
         static let secretKey = "H-mUZylu6pXnKjTOQmzVoXD8_K90z5ep7ED2hUN5xWA"
         static let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
         static let accessScope = "public+read_user+write_likes"
     }
-    enum Endpoints {
+    enum Endpoint {
         static let defaultBaseURLString = "https://api.unsplash.com"
         static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
         static let unsplashOauthTokenURLString = "https://unsplash.com/oauth/token"
+    }
+    enum Path {
+        static let me = "/me"
+        static let photos = "/photos"
+        static func users(_ username: String) -> String { "/users/\(username)" }
+        static func like(_ photoId: String) -> String { "/photos/\(photoId)/like" }
     }
 }

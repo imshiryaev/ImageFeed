@@ -10,6 +10,7 @@ final class ProfileViewController: UIViewController {
     private let profileExitButton = UIButton()
 
     private let profileService = ProfileService.shared
+    private let profileLogoutService = ProfileLogoutService.shared
     private var profileImageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
@@ -37,7 +38,7 @@ final class ProfileViewController: UIViewController {
         setupProfileUsername()
         setupProfileDescription()
         setupExitProfileButton()
-        
+
         view.backgroundColor = .background
     }
 
@@ -45,10 +46,10 @@ final class ProfileViewController: UIViewController {
         guard let imageUrl = ProfileImageService.shared.avatarURL else {
             return
         }
-        
+
         let processor = RoundCornerImageProcessor(cornerRadius: 20)
         profileImageView.kf.setImage(with: URL(string: imageUrl), options: [.processor(processor)])
-        
+
     }
 
     private func updateProfileDetails(profile: ProfileViewModel) {
@@ -144,6 +145,35 @@ final class ProfileViewController: UIViewController {
     private func setupExitProfileButton() {
         view.addSubview(profileExitButton)
         profileExitButton.setImage(.logoutButton, for: .normal)
+        profileExitButton.addAction(
+            UIAction { [weak self] _ in
+                guard let self else { return }
+
+                let confirmLogoutAlert = UIAlertController(
+                    title: "Выход",
+                    message: "Уверены что хотите выйти?",
+                    preferredStyle: .alert
+                )
+                confirmLogoutAlert.addAction(
+                    UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+                        guard let self else { return }
+                        self.profileLogoutService.logout()
+
+                        guard let window = self.view.window else {
+                            assertionFailure("Invalid window configuration")
+                            return
+                        }
+                        let splashVC = SplashViewController()
+                        window.rootViewController = splashVC
+                    }
+                )
+                confirmLogoutAlert.addAction(UIAlertAction(title: "Нет", style: .cancel))
+
+                present(confirmLogoutAlert, animated: true)
+            },
+            for: .touchUpInside
+        )
+
         profileExitButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(
             [
