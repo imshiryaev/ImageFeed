@@ -25,6 +25,7 @@ final class SingleImageViewController: UIViewController {
             },
             for: .touchUpInside
         )
+        backButton.accessibilityIdentifier = "nav back button white"
 
         backButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(

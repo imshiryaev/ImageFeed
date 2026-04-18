@@ -15,7 +15,7 @@ final class ProfileImageService {
     private(set) var avatarURL: String?
     private var currentTask: Task<Void, Error>?
 
-    static let didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
+    private(set) var didChangeProfileImageURL = Notification.Name("ProfileImageProviderDidChange")
     
     func reset() {
         avatarURL = nil
@@ -33,7 +33,7 @@ final class ProfileImageService {
             self.avatarURL = data.profileImage.small
 
             NotificationCenter.default.post(
-                name: ProfileImageService.didChangeProfileImageURL,
+                name: didChangeProfileImageURL,
                 object: self,
                 userInfo: ["URL": data.profileImage.small]
             )

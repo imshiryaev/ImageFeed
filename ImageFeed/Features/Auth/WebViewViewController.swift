@@ -6,22 +6,23 @@ protocol WebViewViewControllerDelegate: AnyObject {
     func webViewViewControllerDidCancel(_ vc: WebViewViewController)
 }
 
-final class WebViewViewController: UIViewController {
+protocol WebViewViewControllerProtocol {
+    var presenter: WebViewPresenterProtocol? { get set }
+    func load(request: URLRequest)
+    func setProgressValue(_ newValue: Float)
+    func setProgressHidden(_ isHidden: Bool)
+}
+
+final class WebViewViewController: UIViewController, WebViewViewControllerProtocol {
+    var presenter: WebViewPresenterProtocol?
     weak var delegate: WebViewViewControllerDelegate?
     private var estimatedProgressObservation: NSObjectProtocol?
 
     private var webView = WKWebView()
-    private lazy var progressView: UIProgressView = {
+    private var progressView: UIProgressView = {
         let progress = UIProgressView()
-        view.addSubview(progress)
         progress.progressTintColor = .background
-
         progress.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            progress.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            progress.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            progress.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-        ])
 
         return progress
     }()
@@ -29,30 +30,44 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        loadAuthView()
         setUpObservation()
+        presenter?.viewDidLoad()
     }
-    
+
     private func setUpObservation() {
         estimatedProgressObservation = webView.observe(
             \.estimatedProgress,
             options: [],
-            changeHandler: { [weak self] _, _ in
+             changeHandler: { [weak self] _,_  in
                 guard let self else { return }
-                self.updateProgress()
+                self.presenter?.didUpdateProgressValue(webView.estimatedProgress)
             }
         )
+    }
+
+    func load(request: URLRequest) {
+        webView.load(request)
     }
 
     private func setupUI() {
         view.backgroundColor = .white
         setupWebView()
-        _ = progressView
+        view.addSubview(progressView)
+        
+        NSLayoutConstraint.activate([
+            progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            progressView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            progressView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+        ])
+
     }
 
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+    func setProgressValue(_ newValue: Float) {
+        progressView.progress = newValue
+    }
+
+    func setProgressHidden(_ isHidden: Bool) {
+        progressView.isHidden = isHidden
     }
 
     private func setupWebView() {
@@ -60,7 +75,8 @@ final class WebViewViewController: UIViewController {
         webView.backgroundColor = .white
         webView.navigationDelegate = self
         webView.scrollView.bounces = false
-        
+        webView.accessibilityIdentifier = "UnsplashWebView"
+
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -72,40 +88,9 @@ final class WebViewViewController: UIViewController {
 }
 
 extension WebViewViewController: WKNavigationDelegate {
-    private func loadAuthView() {
-        let request = URLRequestBuilder(baseURL: API.Endpoint.unsplashAuthorizeURLString)
-            .queryItems([
-                URLQueryItem(name: "client_id", value: API.Key.accessKey),
-                URLQueryItem(name: "redirect_uri", value: API.Key.redirectURI),
-                URLQueryItem(name: "response_type", value: "code"),
-                URLQueryItem(name: "scope", value: API.Key.accessScope),
-            ])
-            .build()
-    
-        webView.load(request)
-    }
-
     private func fetchCode(from navigationAction: WKNavigationAction) -> String? {
-        guard
-            let url = navigationAction.request.url,
-            let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.host == "unsplash.com",
-            urlComponents.path == "/oauth/authorize/native",
-            let item = urlComponents.queryItems?.first(where: { $0.name == "code" })
-        else {
-            #if DEBUG
-                Log(
-                    .debug,
-                    "No OAuth code found in navigation URL — probably a regular page load \(navigationAction.request.url?.absoluteString ?? "nil")"
-                )
-            #endif
-            return nil
-        }
-        #if DEBUG
-            Log(.debug, "Successfully extracted OAuth code")
-        #endif
-
-        return item.value
+        guard let url = navigationAction.request.url else { return nil }
+        return presenter?.code(from: url)
     }
 
     func webView(

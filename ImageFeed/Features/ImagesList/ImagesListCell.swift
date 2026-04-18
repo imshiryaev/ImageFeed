@@ -85,6 +85,9 @@ final class ImagesListCell: UITableViewCell {
         dateLabel.text = data.dateLabel
 
         let likeImage = data.isLiked ? UIImage(resource: .likeFilled) : UIImage(resource: .likeEmpty)
+        let accessibilityIdentifier = data.isLiked ? "like button on" : "like button off"
+        
+        likeButton.accessibilityIdentifier = accessibilityIdentifier
         likeButton.setImage(likeImage, for: .normal)
     }
 }
