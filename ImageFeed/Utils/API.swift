@@ -17,3 +17,41 @@ enum API {
         static func like(_ photoId: String) -> String { "/photos/\(photoId)/like" }
     }
 }
+
+struct ApiConfiguration {
+    static let standart: ApiConfiguration = ApiConfiguration(
+        accessKey: API.Key.accessKey,
+        secretKey: API.Key.secretKey,
+        redirectURI: API.Key.redirectURI,
+        accessScope: API.Key.accessScope,
+        defaultBaseURLString: API.Endpoint.defaultBaseURLString,
+        unsplashAuthorizeURLString: API.Endpoint.unsplashAuthorizeURLString,
+        unsplashOauthTokenURLString: API.Endpoint.unsplashOauthTokenURLString
+    )
+    
+    let accessKey: String
+    let secretKey: String
+    let redirectURI: String
+    let accessScope: String
+    let defaultBaseURLString: String
+    let unsplashAuthorizeURLString: String
+    let unsplashOauthTokenURLString: String
+
+    init(
+        accessKey: String,
+        secretKey: String,
+        redirectURI: String,
+        accessScope: String,
+        defaultBaseURLString: String,
+        unsplashAuthorizeURLString: String,
+        unsplashOauthTokenURLString: String
+    ) {
+        self.accessKey = accessKey
+        self.secretKey = secretKey
+        self.redirectURI = redirectURI
+        self.accessScope = accessScope
+        self.defaultBaseURLString = defaultBaseURLString
+        self.unsplashAuthorizeURLString = unsplashAuthorizeURLString
+        self.unsplashOauthTokenURLString = unsplashOauthTokenURLString
+    }
+}

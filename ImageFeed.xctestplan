@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "ACB669A8-F1DD-4E13-8C4C-309F615C7343",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:ImageFeed.xcodeproj",
+        "identifier" : "4D00FC602F828EBF007AF209",
+        "name" : "ImageFeedTests"
+      }
+    }
+  ],
+  "version" : 1
+}

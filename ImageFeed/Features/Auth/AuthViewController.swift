@@ -34,8 +34,13 @@ final class AuthViewController: UIViewController {
             UIAction { [weak self] _ in
                 guard let self else { return }
 
+                let authHelper = AuthHelper()
+                let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+                
                 let webViewVC = WebViewViewController()
+                webViewVC.presenter = webViewPresenter
                 webViewVC.delegate = self
+                webViewPresenter.view = webViewVC
                 
                 self.navigationController?.pushViewController(webViewVC, animated: true)
             },

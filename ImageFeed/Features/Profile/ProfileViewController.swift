@@ -1,7 +1,15 @@
 import Kingfisher
 import UIKit
 
-final class ProfileViewController: UIViewController {
+protocol ProfileViewControllerProtocol {
+    var presenter: ProfileViewPresenterProtocol? { get set }
+    func updateProfileDetails(profile: ProfileViewModel)
+    func switchToSplash()
+    func updateProfileImage(_ url: URL)
+}
+
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
+    var presenter: (any ProfileViewPresenterProtocol)?
 
     private var profileImageView = UIImageView()
     private let profileName = UILabel()
@@ -9,27 +17,10 @@ final class ProfileViewController: UIViewController {
     private let profileDescription = UILabel()
     private let profileExitButton = UIButton()
 
-    private let profileService = ProfileService.shared
-    private let profileLogoutService = ProfileLogoutService.shared
-    private var profileImageObserver: NSObjectProtocol?
-
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-
-        guard let profile = profileService.profile else { return }
-        updateProfileDetails(profile: profile)
-
-        profileImageObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeProfileImageURL,
-            object: nil,
-            queue: .main,
-            using: { [weak self] _ in
-                guard let self else { return }
-                self.updateProfileImage()
-            }
-        )
-        updateProfileImage()
+        presenter?.viewDidLoad()
     }
 
     private func setupUI() {
@@ -42,17 +33,12 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .background
     }
 
-    private func updateProfileImage() {
-        guard let imageUrl = ProfileImageService.shared.avatarURL else {
-            return
-        }
-
+    func updateProfileImage(_ url: URL) {
         let processor = RoundCornerImageProcessor(cornerRadius: 20)
-        profileImageView.kf.setImage(with: URL(string: imageUrl), options: [.processor(processor)])
-
+        profileImageView.kf.setImage(with: url, options: [.processor(processor)])
     }
 
-    private func updateProfileDetails(profile: ProfileViewModel) {
+    func updateProfileDetails(profile: ProfileViewModel) {
         profileName.text = profile.name
         profileUsername.text = profile.loginName
         profileDescription.text = profile.bio
@@ -148,23 +134,15 @@ final class ProfileViewController: UIViewController {
         profileExitButton.addAction(
             UIAction { [weak self] _ in
                 guard let self else { return }
-
                 let confirmLogoutAlert = UIAlertController(
                     title: "Выход",
                     message: "Уверены что хотите выйти?",
                     preferredStyle: .alert
                 )
                 confirmLogoutAlert.addAction(
-                    UIAlertAction(title: "Да", style: .default) { [weak self] _ in
-                        guard let self else { return }
-                        self.profileLogoutService.logout()
+                    UIAlertAction(title: "Да", style: .default) { _ in
+                        self.presenter?.confirmProfileLogout()
 
-                        guard let window = self.view.window else {
-                            assertionFailure("Invalid window configuration")
-                            return
-                        }
-                        let splashVC = SplashViewController()
-                        window.rootViewController = splashVC
                     }
                 )
                 confirmLogoutAlert.addAction(UIAlertAction(title: "Нет", style: .cancel))
@@ -188,6 +166,15 @@ final class ProfileViewController: UIViewController {
                 ),
             ]
         )
+    }
+
+    func switchToSplash() {
+        guard let window = self.view.window else {
+            assertionFailure("Invalid window configuration")
+            return
+        }
+        let splashVC = SplashViewController()
+        window.rootViewController = splashVC
     }
 
 }
