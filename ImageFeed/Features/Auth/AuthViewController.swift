@@ -46,6 +46,7 @@ final class AuthViewController: UIViewController {
             },
             for: .touchUpInside
         )
+        authButton.accessibilityIdentifier = "AuthButton"
 
         authButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

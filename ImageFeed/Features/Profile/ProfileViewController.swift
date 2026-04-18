@@ -146,11 +146,12 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
                     }
                 )
                 confirmLogoutAlert.addAction(UIAlertAction(title: "Нет", style: .cancel))
-
+                
                 present(confirmLogoutAlert, animated: true)
             },
             for: .touchUpInside
         )
+        profileExitButton.accessibilityIdentifier = "logout button"
 
         profileExitButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(

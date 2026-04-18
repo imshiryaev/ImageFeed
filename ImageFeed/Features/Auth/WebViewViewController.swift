@@ -75,6 +75,7 @@ final class WebViewViewController: UIViewController, WebViewViewControllerProtoc
         webView.backgroundColor = .white
         webView.navigationDelegate = self
         webView.scrollView.bounces = false
+        webView.accessibilityIdentifier = "UnsplashWebView"
 
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
